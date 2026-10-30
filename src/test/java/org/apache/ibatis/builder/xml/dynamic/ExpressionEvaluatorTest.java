@@ -19,7 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.domain.blog.Section;
@@ -79,6 +81,29 @@ class ExpressionEvaluatorTest {
       public double d = 0.0D;
     }
     assertFalse(evaluator.evaluateBoolean("d", new Bean()));
+  }
+
+  @Test
+  void shouldReturnTrueForNonFiniteFloatingPointValues() {
+    for (Number value : new Number[] { Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, Double.NaN,
+        Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY }) {
+      assertTrue(evaluator.evaluateBoolean("value", Map.of("value", value)), value.toString());
+    }
+  }
+
+  @Test
+  void shouldReturnFalseForZeroNumbers() {
+    for (Number value : new Number[] { 0.0F, -0.0F, 0.0D, -0.0D, new BigDecimal("0.000") }) {
+      assertFalse(evaluator.evaluateBoolean("value", Map.of("value", value)), value.toString());
+    }
+  }
+
+  @Test
+  void shouldReturnTrueForSmallNonZeroNumbers() {
+    for (Number value : new Number[] { Float.MIN_VALUE, -Float.MIN_VALUE, Double.MIN_VALUE, -Double.MIN_VALUE,
+        new BigDecimal("1E-1000"), new BigDecimal("-1E-1000") }) {
+      assertTrue(evaluator.evaluateBoolean("value", Map.of("value", value)), value.toString());
+    }
   }
 
   @Test
