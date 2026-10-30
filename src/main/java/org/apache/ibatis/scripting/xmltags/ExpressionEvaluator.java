@@ -35,6 +35,9 @@ public class ExpressionEvaluator {
     if (value instanceof Boolean) {
       return (Boolean) value;
     }
+    if (value instanceof Float || value instanceof Double) {
+      return ((Number) value).doubleValue() != 0;
+    }
     if (value instanceof Number) {
       return new BigDecimal(String.valueOf(value)).compareTo(BigDecimal.ZERO) != 0;
     }
